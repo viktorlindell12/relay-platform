@@ -55,7 +55,7 @@
 | **BFF** | Single entry point. Validates JWT, routes to internal services. |
 | **Auth** | Registration, login, JWT issuance. |
 | **User** | User profile CRUD. Exposes `GetUserById` via gRPC. |
-| **Message** | Stores messages. Publishes `message-published` to RabbitMQ. |
+| **Message** | Stores messages. Publishes `message.published` to RabbitMQ. |
 | **Bot** | Consumes events, replies automatically via Message Service. |
 
 ## Event Flow
@@ -64,7 +64,7 @@
 Client sends message
   → BFF validates JWT
   → Message Service saves to message_db
-  → Message Service publishes message-published to RabbitMQ
+  → Message Service publishes message.published to RabbitMQ
   → Bot Service consumes event
   → Bot Service posts reply via Message Service
 ```
@@ -99,18 +99,20 @@ RabbitMQ Management at `http://localhost:15672` (guest/guest)
 
 ### Run locally (development)
 
-Start each service individually after starting the databases:
+Start infrastructure first, then each service in its own terminal tab:
 
 ```bash
-# Start infrastructure
+# Terminal 1 — infrastructure
 docker-compose up -d auth-db user-db message-db rabbitmq
+```
 
-# Start services
-cd relay-auth-service && mvn spring-boot:run
-cd relay-user-service && mvn spring-boot:run
-cd relay-message-service && mvn spring-boot:run
-cd relay-bff-service && mvn spring-boot:run
-cd relay-bot-service && mvn spring-boot:run
+```bash
+# Terminal 2-6 — one per service (run from repo root)
+mvn spring-boot:run -f relay-auth-service/pom.xml
+mvn spring-boot:run -f relay-user-service/pom.xml
+mvn spring-boot:run -f relay-message-service/pom.xml
+mvn spring-boot:run -f relay-bff-service/pom.xml
+mvn spring-boot:run -f relay-bot-service/pom.xml
 ```
 
 ### Kubernetes (Minikube)
