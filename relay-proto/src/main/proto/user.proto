@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package relay.user;
+
+option java_package = "com.relay.proto.user";
+option java_outer_classname = "UserProto";
+option java_multiple_files = true;
+
+service UserService {
+  rpc GetUserById (GetUserByIdRequest) returns (UserResponse);
+}
+
+message GetUserByIdRequest {
+  int64 user_id = 1;
+}
+
+message UserResponse {
+  int64 id = 1;
+  string email = 2;
+  string display_name = 3;
+}
