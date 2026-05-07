@@ -4,7 +4,7 @@
 
 ## Architecture
 
-```
+```text
 ┌─────────────┐     REST      ┌──────────────────┐
 │   Frontend  │ ────────────► │   relay-bff       │
 │  React/Vite │               │   :8080           │
@@ -35,11 +35,11 @@
 
 | Service              | Language | Framework        | Database   |
 |----------------------|----------|------------------|------------|
-| relay-bff-service    | Java 25  | Spring Boot 3.4  | —          |
-| relay-auth-service   | Java 25  | Spring Boot 3.4  | PostgreSQL |
-| relay-user-service   | Java 25  | Spring Boot 3.4  | PostgreSQL |
-| relay-message-service| Java 25  | Spring Boot 3.4  | PostgreSQL |
-| relay-bot-service    | Java 25  | Spring Boot 3.4  | —          |
+| relay-bff-service    | Java 25  | Spring Boot 3.5  | —          |
+| relay-auth-service   | Java 25  | Spring Boot 3.5  | PostgreSQL |
+| relay-user-service   | Java 25  | Spring Boot 3.5  | PostgreSQL |
+| relay-message-service| Java 25  | Spring Boot 3.5  | PostgreSQL |
+| relay-bot-service    | Java 25  | Spring Boot 3.5  | —          |
 | relay-frontend       | TypeScript| React + Vite    | —          |
 
 **Message Queue:** RabbitMQ  
@@ -60,7 +60,7 @@
 
 ## Event Flow
 
-```
+```text
 Client sends message
   → BFF validates JWT
   → Message Service saves to message_db
