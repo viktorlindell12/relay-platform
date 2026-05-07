@@ -1,0 +1,22 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: relay-bot-service
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+services:
+  message-url: ${MESSAGE_SERVICE_URL:http://localhost:8083}
+
+relay:
+  bot:
+    user-id: ${BOT_USER_ID:0}
+
+logging:
+  level:
+    com.relay: INFO

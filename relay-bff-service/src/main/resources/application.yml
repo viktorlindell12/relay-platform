@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: relay-bff-service
+
+services:
+  auth-url: ${AUTH_SERVICE_URL:http://localhost:8081}
+  user-url: ${USER_SERVICE_URL:http://localhost:8082}
+  message-url: ${MESSAGE_SERVICE_URL:http://localhost:8083}
+
+jwt:
+  secret: ${JWT_SECRET:dev-secret-change-in-production-must-be-at-least-256-bits-long}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.relay: INFO
