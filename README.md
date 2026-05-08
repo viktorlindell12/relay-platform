@@ -2,6 +2,8 @@
 
 > Distributed communication platform for development teams
 
+[![CI](https://github.com/viktorlindell12/relay-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/viktorlindell12/relay-platform/actions/workflows/ci.yml)
+
 ## Architecture
 
 ```text
