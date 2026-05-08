@@ -19,6 +19,14 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
+     * Returns 409 Conflict when a registration attempt uses an already registered email.
+     */
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailExists(EmailAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.of(409, ex.getMessage()));
+    }
+
+    /**
      * Handles bean validation failures and returns the first field error as the message.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
