@@ -35,11 +35,11 @@
 
 | Service              | Language | Framework        | Database   |
 |----------------------|----------|------------------|------------|
-| relay-bff-service    | Java 25  | Spring Boot 3.5  | —          |
-| relay-auth-service   | Java 25  | Spring Boot 3.5  | PostgreSQL |
-| relay-user-service   | Java 25  | Spring Boot 3.5  | PostgreSQL |
-| relay-message-service| Java 25  | Spring Boot 3.5  | PostgreSQL |
-| relay-bot-service    | Java 25  | Spring Boot 3.5  | —          |
+| relay-bff-service    | Java 25  | Spring Boot 4.0  | —          |
+| relay-auth-service   | Java 25  | Spring Boot 4.0  | PostgreSQL |
+| relay-user-service   | Java 25  | Spring Boot 4.0  | PostgreSQL |
+| relay-message-service| Java 25  | Spring Boot 4.0  | PostgreSQL |
+| relay-bot-service    | Java 25  | Spring Boot 4.0  | —          |
 | relay-frontend       | TypeScript| React + Vite    | —          |
 
 **Message Queue:** RabbitMQ  
