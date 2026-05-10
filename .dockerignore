@@ -1,0 +1,10 @@
+.git
+.github
+.env
+.env.*
+*.md
+docs
+target
+*/target
+.gitignore
+.gitpod.yml
