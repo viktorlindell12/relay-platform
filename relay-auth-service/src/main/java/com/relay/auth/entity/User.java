@@ -24,6 +24,9 @@ public class User {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(nullable = false)
+    private String role = "USER";
+
     @PrePersist
     private void prePersist() {
         createdAt = Instant.now();
@@ -40,4 +43,8 @@ public class User {
     public void setPassword(String password) { this.password = password; }
 
     public Instant getCreatedAt() { return createdAt; }
+
+    public String getRole() { return role; }
+
+    public void setRole(String role) { this.role = role; }
 }
