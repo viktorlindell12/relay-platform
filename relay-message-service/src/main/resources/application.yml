@@ -10,7 +10,7 @@ spring:
     password: ${DB_PASSWORD:relay}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -20,6 +20,9 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+
+internal:
+  api-key: ${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set}
 
 relay:
   events:
