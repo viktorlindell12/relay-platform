@@ -62,7 +62,7 @@ public class MessageController {
     @GetMapping
     public ResponseEntity<Page<MessageResponse>> getByChannel(
             @RequestParam @NotBlank String channel,
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+            @PageableDefault(size = 20, sort = {"createdAt", "id"}) Pageable pageable) {
         return ResponseEntity.ok(messageService.getByChannel(channel, pageable));
     }
 
