@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && groupadd --system relay && useradd --system --gid relay relay
 
 WORKDIR /app
-COPY --from=build /workspace/relay-auth-service/target/*.jar app.jar
+COPY --from=build /workspace/relay-auth-service/target/app.jar app.jar
 
 USER relay
 EXPOSE 8081

@@ -41,7 +41,7 @@ services:
       AUTH_DB_URL: jdbc:postgresql://postgres:5432/auth_db
       DB_USER: ${DB_USER:-relay}
       DB_PASSWORD: ${DB_PASSWORD:-changeme}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
     ports:
       - "127.0.0.1:8081:8081"
