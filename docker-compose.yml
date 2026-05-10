@@ -55,5 +55,29 @@ services:
       retries: 5
       start_period: 30s
 
+  relay-user-service:
+    build:
+      context: .
+      dockerfile: relay-user-service/Dockerfile
+    container_name: relay-user-service
+    environment:
+      USER_DB_URL: jdbc:postgresql://postgres:5432/user_db
+      DB_USER: ${DB_USER:-relay}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in .env}
+      GRPC_PORT: ${GRPC_PORT:-9090}
+    ports:
+      - "127.0.0.1:8082:8082"
+    # gRPC port 9090 is intentionally not published to the host — reachable only within the Docker network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
 volumes:
   postgres_data:
