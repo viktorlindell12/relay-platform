@@ -2,8 +2,8 @@ package com.relay.message.service;
 
 import com.relay.message.dto.CreateMessageRequest;
 import com.relay.message.dto.MessageResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Business logic contract for message operations.
@@ -11,7 +11,7 @@ import java.util.List;
 public interface MessageService {
 
     /**
-     * Persists a new message and publishes a {@code message.published} event.
+     * Persists a new message and publishes a {@code message.published} event after commit.
      *
      * @param request sender, channel, and content
      * @return the persisted message
@@ -28,12 +28,13 @@ public interface MessageService {
     MessageResponse getById(Long id);
 
     /**
-     * Returns all messages in the given channel ordered by creation time ascending.
+     * Returns a page of messages in the given channel ordered by creation time ascending.
      *
-     * @param channelId the channel to fetch messages for
-     * @return ordered list of messages, empty if the channel has no messages
+     * @param channel  the channel name to filter by (e.g. "general")
+     * @param pageable pagination and sort parameters
+     * @return one page of matching messages
      */
-    List<MessageResponse> getByChannel(Long channelId);
+    Page<MessageResponse> getByChannel(String channel, Pageable pageable);
 
     /**
      * Deletes a message by its internal ID.

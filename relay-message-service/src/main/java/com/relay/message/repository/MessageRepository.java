@@ -1,9 +1,9 @@
 package com.relay.message.repository;
 
 import com.relay.message.entity.Message;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
 
 /**
  * Persistence operations for {@link Message} entities.
@@ -11,10 +11,11 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
     /**
-     * Returns all messages in the given channel ordered by creation time ascending.
+     * Returns a page of messages in the given channel ordered by the {@link Pageable} sort.
      *
-     * @param channelId the channel to fetch messages for
-     * @return ordered list of messages, empty if none exist
+     * @param channel  the channel name to filter by (e.g. "general")
+     * @param pageable pagination and sort parameters
+     * @return one page of matching messages
      */
-    List<Message> findByChannelIdOrderByCreatedAtAsc(Long channelId);
+    Page<Message> findByChannel(String channel, Pageable pageable);
 }

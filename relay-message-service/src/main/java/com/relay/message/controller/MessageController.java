@@ -4,13 +4,15 @@ import com.relay.message.dto.CreateMessageRequest;
 import com.relay.message.dto.MessageResponse;
 import com.relay.message.service.MessageService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Internal REST endpoints for message operations.
@@ -28,9 +30,9 @@ public class MessageController {
     }
 
     /**
-     * Sends a message to a channel and publishes a {@code message.published} event.
+     * Sends a message to a channel and publishes a {@code message.published} event after commit.
      *
-     * @param request sender, channel, and content
+     * @param request sender, channel name, and content
      * @return 201 Created with the persisted message
      */
     @PostMapping
@@ -50,14 +52,18 @@ public class MessageController {
     }
 
     /**
-     * Returns all messages in the given channel ordered by creation time ascending.
+     * Returns a page of messages in the given channel ordered by creation time ascending.
+     * Default page size is 20; override with {@code ?page=0&size=50&sort=createdAt,asc}.
      *
-     * @param channelId the channel to fetch messages for
-     * @return 200 OK with the ordered list
+     * @param channel  channel name to filter by (e.g. "general")
+     * @param pageable pagination and sort parameters resolved from query string
+     * @return 200 OK with a page of messages
      */
     @GetMapping
-    public ResponseEntity<List<MessageResponse>> getByChannel(@RequestParam @Positive Long channelId) {
-        return ResponseEntity.ok(messageService.getByChannel(channelId));
+    public ResponseEntity<Page<MessageResponse>> getByChannel(
+            @RequestParam @NotBlank String channel,
+            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+        return ResponseEntity.ok(messageService.getByChannel(channel, pageable));
     }
 
     /**

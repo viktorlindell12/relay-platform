@@ -7,8 +7,8 @@ import java.time.Instant;
  *
  * @param id        internal message ID
  * @param senderId  authUserId of the sender
- * @param channelId ID of the channel the message belongs to
+ * @param channel   name of the channel the message belongs to (e.g. "general")
  * @param content   message text
- * @param createdAt timestamp when the message was persisted
+ * @param createdAt UTC timestamp when the message was persisted
  */
-public record MessageResponse(Long id, Long senderId, Long channelId, String content, Instant createdAt) {}
+public record MessageResponse(Long id, Long senderId, String channel, String content, Instant createdAt) {}

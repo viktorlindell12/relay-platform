@@ -5,8 +5,8 @@ import java.time.Instant;
 
 /**
  * Stores a single message sent in a channel.
- * {@code senderId} and {@code channelId} are foreign keys by convention only —
- * no DB-level FK constraints because the referenced entities live in separate services.
+ * {@code senderId} is a foreign key by convention only — no DB-level FK constraint
+ * because the referenced user entity lives in a separate service.
  */
 @Entity
 @Table(name = "messages")
@@ -19,8 +19,8 @@ public class Message {
     @Column(name = "sender_id", nullable = false)
     private Long senderId;
 
-    @Column(name = "channel_id", nullable = false)
-    private Long channelId;
+    @Column(nullable = false, length = 100)
+    private String channel;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -42,11 +42,11 @@ public class Message {
     /** @param senderId authUserId of the message sender */
     public void setSenderId(Long senderId) { this.senderId = senderId; }
 
-    /** @return ID of the channel this message belongs to */
-    public Long getChannelId() { return channelId; }
+    /** @return name of the channel this message belongs to (e.g. "general") */
+    public String getChannel() { return channel; }
 
-    /** @param channelId ID of the channel this message belongs to */
-    public void setChannelId(Long channelId) { this.channelId = channelId; }
+    /** @param channel name of the channel this message belongs to */
+    public void setChannel(String channel) { this.channel = channel; }
 
     /** @return message text */
     public String getContent() { return content; }
@@ -54,6 +54,6 @@ public class Message {
     /** @param content message text */
     public void setContent(String content) { this.content = content; }
 
-    /** @return timestamp when this message was persisted */
+    /** @return UTC timestamp when this message was persisted */
     public Instant getCreatedAt() { return createdAt; }
 }
