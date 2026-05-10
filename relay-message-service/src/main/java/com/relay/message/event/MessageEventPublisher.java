@@ -37,7 +37,7 @@ public class MessageEventPublisher {
         MessageSentEvent event = new MessageSentEvent(
                 message.getId(),
                 message.getSenderId(),
-                message.getChannelId(),
+                message.getChannel(),
                 message.getContent(),
                 message.getCreatedAt()
         );

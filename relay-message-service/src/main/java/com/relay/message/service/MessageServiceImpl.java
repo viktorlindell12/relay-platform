@@ -8,12 +8,12 @@ import com.relay.message.exception.MessageNotFoundException;
 import com.relay.message.repository.MessageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import java.util.List;
 
 /**
  * Default implementation of {@link MessageService}.
@@ -39,11 +39,11 @@ public class MessageServiceImpl implements MessageService {
     public MessageResponse send(CreateMessageRequest request) {
         Message message = new Message();
         message.setSenderId(request.senderId());
-        message.setChannelId(request.channelId());
+        message.setChannel(request.channel());
         message.setContent(request.content());
 
         Message saved = messageRepository.save(message);
-        log.debug("Persisted message id={} in channel={}", saved.getId(), saved.getChannelId());
+        log.debug("Persisted message id={} in channel={}", saved.getId(), saved.getChannel());
 
         // Publish only after the DB transaction commits — prevents consumers from receiving
         // an event for a message that was never durably stored due to a rollback.
@@ -78,11 +78,9 @@ public class MessageServiceImpl implements MessageService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<MessageResponse> getByChannel(Long channelId) {
-        return messageRepository.findByChannelIdOrderByCreatedAtAsc(channelId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<MessageResponse> getByChannel(String channel, Pageable pageable) {
+        return messageRepository.findByChannel(channel, pageable)
+                .map(this::toResponse);
     }
 
     /**
@@ -101,7 +99,7 @@ public class MessageServiceImpl implements MessageService {
         return new MessageResponse(
                 message.getId(),
                 message.getSenderId(),
-                message.getChannelId(),
+                message.getChannel(),
                 message.getContent(),
                 message.getCreatedAt()
         );
