@@ -39,6 +39,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         UserProfile profile = new UserProfile();
         profile.setAuthUserId(request.authUserId());
+        profile.setEmail(request.email());
         profile.setDisplayName(request.displayName());
 
         try {
@@ -94,6 +95,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         return new UserProfileResponse(
                 profile.getId(),
                 profile.getAuthUserId(),
+                profile.getEmail(),
                 profile.getDisplayName(),
                 profile.getCreatedAt()
         );
