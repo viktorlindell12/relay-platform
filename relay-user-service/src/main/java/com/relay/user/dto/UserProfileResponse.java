@@ -5,4 +5,4 @@ import java.time.Instant;
 /**
  * Response body for all user profile endpoints.
  */
-public record UserProfileResponse(Long id, Long authUserId, String displayName, Instant createdAt) {}
+public record UserProfileResponse(Long id, Long authUserId, String email, String displayName, Instant createdAt) {}

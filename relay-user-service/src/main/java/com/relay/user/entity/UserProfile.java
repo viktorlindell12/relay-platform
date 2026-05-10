@@ -22,6 +22,9 @@ public class UserProfile {
     @Column(name = "display_name", nullable = false, length = 100)
     private String displayName;
 
+    @Column(nullable = false, unique = true)
+    private String email;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -44,6 +47,12 @@ public class UserProfile {
 
     /** @param displayName publicly visible display name */
     public void setDisplayName(String displayName) { this.displayName = displayName; }
+
+    /** @return email address copied from the auth service at profile creation */
+    public String getEmail() { return email; }
+
+    /** @param email email address copied from the auth service at profile creation */
+    public void setEmail(String email) { this.email = email; }
 
     /** @return timestamp when this profile was created */
     public Instant getCreatedAt() { return createdAt; }
