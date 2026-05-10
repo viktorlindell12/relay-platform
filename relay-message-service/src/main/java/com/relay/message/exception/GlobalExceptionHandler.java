@@ -1,5 +1,6 @@
 package com.relay.message.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFound(MessageNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponse.of(404, ex.getMessage()));
+    }
+
+    /**
+     * Handles constraint violations on path variables and query parameters (e.g. {@code @Positive}).
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                .findFirst()
+                .orElse("Validation failed");
+        return ResponseEntity.badRequest().body(ErrorResponse.of(400, message));
     }
 
     /**

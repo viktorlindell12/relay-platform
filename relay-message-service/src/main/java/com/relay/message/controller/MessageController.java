@@ -4,8 +4,10 @@ import com.relay.message.dto.CreateMessageRequest;
 import com.relay.message.dto.MessageResponse;
 import com.relay.message.service.MessageService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.List;
  * Internal REST endpoints for message operations.
  * All routes require the {@code X-Internal-Key} header — they are not exposed publicly.
  */
+@Validated
 @RestController
 @RequestMapping("/api/messages")
 public class MessageController {
@@ -42,7 +45,7 @@ public class MessageController {
      * @return 200 OK with the message, or 404 if not found
      */
     @GetMapping("/{id}")
-    public ResponseEntity<MessageResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<MessageResponse> getById(@PathVariable @Positive Long id) {
         return ResponseEntity.ok(messageService.getById(id));
     }
 
@@ -53,7 +56,7 @@ public class MessageController {
      * @return 200 OK with the ordered list
      */
     @GetMapping
-    public ResponseEntity<List<MessageResponse>> getByChannel(@RequestParam Long channelId) {
+    public ResponseEntity<List<MessageResponse>> getByChannel(@RequestParam @Positive Long channelId) {
         return ResponseEntity.ok(messageService.getByChannel(channelId));
     }
 
@@ -64,7 +67,7 @@ public class MessageController {
      * @return 204 No Content, or 404 if not found
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable @Positive Long id) {
         messageService.delete(id);
         return ResponseEntity.noContent().build();
     }

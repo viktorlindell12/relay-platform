@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -43,7 +45,15 @@ public class MessageServiceImpl implements MessageService {
         Message saved = messageRepository.save(message);
         log.debug("Persisted message id={} in channel={}", saved.getId(), saved.getChannelId());
 
-        eventPublisher.publishMessageSent(saved);
+        // Publish only after the DB transaction commits — prevents consumers from receiving
+        // an event for a message that was never durably stored due to a rollback
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                eventPublisher.publishMessageSent(saved);
+            }
+        });
+
         return toResponse(saved);
     }
 
