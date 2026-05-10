@@ -46,11 +46,16 @@ public class MessageServiceImpl implements MessageService {
         log.debug("Persisted message id={} in channel={}", saved.getId(), saved.getChannelId());
 
         // Publish only after the DB transaction commits — prevents consumers from receiving
-        // an event for a message that was never durably stored due to a rollback
+        // an event for a message that was never durably stored due to a rollback.
+        // Errors are caught so a broker failure does not fail an already-committed request.
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                eventPublisher.publishMessageSent(saved);
+                try {
+                    eventPublisher.publishMessageSent(saved);
+                } catch (Exception e) {
+                    log.error("Failed to publish message.published event for message id={}", saved.getId(), e);
+                }
             }
         });
 
