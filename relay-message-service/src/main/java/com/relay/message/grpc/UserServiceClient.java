@@ -3,6 +3,7 @@ package com.relay.message.grpc;
 import com.relay.proto.user.GetUserByIdRequest;
 import com.relay.proto.user.UserServiceGrpc;
 import io.grpc.StatusRuntimeException;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.grpc.client.GrpcChannelFactory;
@@ -17,6 +18,8 @@ public class UserServiceClient {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceClient.class);
     private static final String FALLBACK_DISPLAY_NAME = "Unknown User";
+
+    private static final int DEADLINE_SECONDS = 3;
 
     private final UserServiceGrpc.UserServiceBlockingStub stub;
 
@@ -34,9 +37,9 @@ public class UserServiceClient {
      */
     public String getDisplayName(Long authUserId) {
         try {
-            return stub.getUserById(
-                    GetUserByIdRequest.newBuilder().setUserId(authUserId).build()
-            ).getDisplayName();
+            return stub.withDeadlineAfter(DEADLINE_SECONDS, TimeUnit.SECONDS)
+                    .getUserById(GetUserByIdRequest.newBuilder().setUserId(authUserId).build())
+                    .getDisplayName();
         } catch (StatusRuntimeException e) {
             log.warn("User service call failed for userId={}: {}", authUserId, e.getStatus());
             return FALLBACK_DISPLAY_NAME;
