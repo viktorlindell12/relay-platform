@@ -32,6 +32,14 @@ relay:
     routing-key:
       message-published: message.published
 
+spring:
+  grpc:
+    client:
+      channels:
+        user-service:
+          address: ${USER_SERVICE_GRPC_ADDRESS:localhost:9090}
+          negotiation-type: plaintext
+
 logging:
   level:
     com.relay: INFO
