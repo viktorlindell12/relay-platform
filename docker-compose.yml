@@ -93,7 +93,7 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in .env}
-      USER_SERVICE_GRPC_ADDRESS: relay-user-service:9090
+      USER_SERVICE_GRPC_ADDRESS: relay-user-service:${GRPC_PORT:-9090}
     ports:
       - "127.0.0.1:8083:8083"
     depends_on:
