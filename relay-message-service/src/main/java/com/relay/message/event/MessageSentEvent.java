@@ -10,6 +10,6 @@ import java.time.Instant;
  * @param senderId  authUserId of the sender
  * @param channel   name of the channel the message was posted to (e.g. "general")
  * @param content   message text
- * @param createdAt UTC timestamp when the message was persisted
+ * @param timestamp UTC timestamp when the message was persisted
  */
-public record MessageSentEvent(Long messageId, Long senderId, String channel, String content, Instant createdAt) {}
+public record MessageSentEvent(Long messageId, Long senderId, String channel, String content, Instant timestamp) {}

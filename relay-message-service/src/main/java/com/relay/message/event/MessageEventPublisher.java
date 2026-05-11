@@ -34,6 +34,7 @@ public class MessageEventPublisher {
      * @param message the message that was just persisted
      */
     public void publishMessageSent(Message message) {
+        log.info("Publishing message-published event for messageId={}", message.getId());
         MessageSentEvent event = new MessageSentEvent(
                 message.getId(),
                 message.getSenderId(),
@@ -42,6 +43,5 @@ public class MessageEventPublisher {
                 message.getCreatedAt()
         );
         rabbitTemplate.convertAndSend(exchange, routingKey, event);
-        log.debug("Published message.published event for message id={}", message.getId());
     }
 }
