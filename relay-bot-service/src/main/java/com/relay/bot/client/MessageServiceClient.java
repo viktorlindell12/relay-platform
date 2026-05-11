@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 /**
  * HTTP client for relay-message-service.
@@ -31,13 +32,17 @@ public class MessageServiceClient {
      * @param content  message text to post
      */
     public void postMessage(Long senderId, String channel, String content) {
-        restClient.post()
-                .uri("/api/messages")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new SendMessageRequest(senderId, channel, content))
-                .retrieve()
-                .onStatus(status -> !status.is2xxSuccessful(), (req, resp) ->
-                        log.warn("Failed to post bot reply to channel={}: HTTP {}", channel, resp.getStatusCode()))
-                .toBodilessEntity();
+        try {
+            restClient.post()
+                    .uri("/api/messages")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new SendMessageRequest(senderId, channel, content))
+                    .retrieve()
+                    .onStatus(status -> !status.is2xxSuccessful(), (req, resp) ->
+                            log.warn("Failed to post bot reply to channel={}: HTTP {}", channel, resp.getStatusCode()))
+                    .toBodilessEntity();
+        } catch (RestClientException e) {
+            log.warn("Failed to post bot reply to channel={}: {}", channel, e.getMessage());
+        }
     }
 }
