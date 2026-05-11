@@ -16,6 +16,12 @@ services:
 relay:
   bot:
     user-id: ${BOT_USER_ID:0}
+  events:
+    exchange: relay.events
+    routing-key:
+      message-published: message.published
+    queue:
+      message-published: relay.bot.message-published
 
 logging:
   level:
