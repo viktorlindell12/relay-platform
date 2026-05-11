@@ -79,5 +79,34 @@ services:
       retries: 5
       start_period: 30s
 
+  relay-message-service:
+    build:
+      context: .
+      dockerfile: relay-message-service/Dockerfile
+    container_name: relay-message-service
+    environment:
+      MESSAGE_DB_URL: jdbc:postgresql://postgres:5432/message_db
+      DB_USER: ${DB_USER:-relay}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in .env}
+      USER_SERVICE_GRPC_ADDRESS: relay-user-service:${GRPC_PORT:-9090}
+    ports:
+      - "127.0.0.1:8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
 volumes:
   postgres_data:
