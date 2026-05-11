@@ -5,6 +5,7 @@ import com.relay.message.dto.MessageResponse;
 import com.relay.message.entity.Message;
 import com.relay.message.event.MessageEventPublisher;
 import com.relay.message.exception.MessageNotFoundException;
+import com.relay.message.grpc.UserServiceClient;
 import com.relay.message.repository.MessageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +26,14 @@ public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
     private final MessageEventPublisher eventPublisher;
+    private final UserServiceClient userServiceClient;
 
-    public MessageServiceImpl(MessageRepository messageRepository, MessageEventPublisher eventPublisher) {
+    public MessageServiceImpl(MessageRepository messageRepository,
+                               MessageEventPublisher eventPublisher,
+                               UserServiceClient userServiceClient) {
         this.messageRepository = messageRepository;
         this.eventPublisher = eventPublisher;
+        this.userServiceClient = userServiceClient;
     }
 
     /**
@@ -96,9 +101,11 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private MessageResponse toResponse(Message message) {
+        String senderDisplayName = userServiceClient.getDisplayName(message.getSenderId());
         return new MessageResponse(
                 message.getId(),
                 message.getSenderId(),
+                senderDisplayName,
                 message.getChannel(),
                 message.getContent(),
                 message.getCreatedAt()

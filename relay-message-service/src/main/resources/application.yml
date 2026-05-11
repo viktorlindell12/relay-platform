@@ -22,6 +22,12 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+  grpc:
+    client:
+      channels:
+        user-service:
+          address: ${USER_SERVICE_GRPC_ADDRESS:localhost:9090}
+          negotiation-type: plaintext
 
 internal:
   api-key: ${INTERNAL_API_KEY}
