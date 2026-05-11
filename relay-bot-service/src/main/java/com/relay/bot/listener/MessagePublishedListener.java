@@ -25,7 +25,6 @@ public class MessagePublishedListener {
             errorHandler = "messagePublishedErrorHandler"
     )
     public void onMessagePublished(MessagePublishedEvent event) {
-        log.info("Received message-published event: messageId={} channel={} senderId={}",
-                event.messageId(), event.channel(), event.senderId());
+        log.info("Received message-published event: messageId={} channel={}", event.messageId(), event.channel());
     }
 }

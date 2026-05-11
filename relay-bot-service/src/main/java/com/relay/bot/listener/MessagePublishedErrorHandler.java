@@ -34,9 +34,10 @@ public class MessagePublishedErrorHandler implements RabbitListenerErrorHandler 
                               Channel channel,
                               org.springframework.messaging.Message<?> message,
                               ListenerExecutionFailedException exception) {
-        String body = new String(amqpMessage.getBody(), StandardCharsets.UTF_8);
+        String rawBody = new String(amqpMessage.getBody(), StandardCharsets.UTF_8);
+        String preview = rawBody.length() > 100 ? rawBody.substring(0, 100) + "..." : rawBody;
         Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
-        log.warn("Discarding malformed message-published event body=[{}]: {}", body, cause.getMessage());
+        log.warn("Discarding malformed message-published event preview=[{}]: {}", preview, cause.getMessage());
         return null;
     }
 }
