@@ -2,9 +2,10 @@ package com.relay.bot.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.listener.api.RabbitListenerErrorHandler;
-import org.springframework.amqp.rabbit.listener.exception.ListenerExecutionFailedException;
+import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -23,12 +24,14 @@ public class MessagePublishedErrorHandler implements RabbitListenerErrorHandler 
      * and discard the message without requeuing.
      *
      * @param amqpMessage the raw AMQP message
+     * @param channel     the AMQP channel (may be {@code null})
      * @param message     the Spring messaging wrapper (may be {@code null} if conversion failed)
      * @param exception   the exception thrown by the listener or message converter
      * @return {@code null} — signals acknowledgement without result
      */
     @Override
     public Object handleError(Message amqpMessage,
+                              Channel channel,
                               org.springframework.messaging.Message<?> message,
                               ListenerExecutionFailedException exception) {
         String body = new String(amqpMessage.getBody(), StandardCharsets.UTF_8);
