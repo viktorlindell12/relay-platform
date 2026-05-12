@@ -10,12 +10,17 @@ spring:
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASSWORD:guest}
 
+internal:
+  api-key: ${INTERNAL_API_KEY}
+
 services:
   message-url: ${MESSAGE_SERVICE_URL:http://localhost:8083}
 
 relay:
   bot:
     user-id: ${BOT_USER_ID:0}
+    reply-content: "Hello from RelayBot — message received ✓"
+    reply-delay-ms: ${BOT_REPLY_DELAY_MS:500}
   events:
     exchange: relay.events
     routing-key:
