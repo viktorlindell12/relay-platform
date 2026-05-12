@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -13,14 +14,16 @@ import java.nio.charset.StandardCharsets;
 /**
  * Validates JWTs and extracts claims.
  * Uses the same HMAC-SHA256 signing key as relay-auth-service — no network call required.
+ * The signing key is derived once at construction time.
  */
 @Service
 public class JwtService {
 
-    private final JwtProperties jwtProperties;
+    private final SecretKey signingKey;
 
     public JwtService(JwtProperties jwtProperties) {
-        this.jwtProperties = jwtProperties;
+        Assert.hasText(jwtProperties.secret(), "jwt.secret must not be blank");
+        this.signingKey = Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -30,7 +33,7 @@ public class JwtService {
      */
     public boolean validate(String token) {
         try {
-            Jwts.parser().verifyWith(signingKey()).build().parseSignedClaims(token);
+            Jwts.parser().verifyWith(signingKey).build().parseSignedClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -41,7 +44,7 @@ public class JwtService {
      * Extracts the {@code userId} custom claim. Call {@link #validate(String)} first.
      *
      * @param token compact JWT string
-     * @return user ID
+     * @return user ID, or {@code null} if the claim is absent
      */
     public Long extractUserId(String token) {
         return extractAllClaims(token).get("userId", Long.class);
@@ -61,7 +64,7 @@ public class JwtService {
      * Extracts the {@code role} custom claim. Call {@link #validate(String)} first.
      *
      * @param token compact JWT string
-     * @return role string, e.g. {@code "USER"}
+     * @return role string, e.g. {@code "USER"}, or {@code null} if the claim is absent
      */
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
@@ -69,14 +72,9 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(signingKey())
+                .verifyWith(signingKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
-
-    private SecretKey signingKey() {
-        byte[] keyBytes = jwtProperties.secret().getBytes(StandardCharsets.UTF_8);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
