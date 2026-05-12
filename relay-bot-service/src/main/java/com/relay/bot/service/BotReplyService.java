@@ -5,6 +5,7 @@ import com.relay.bot.config.BotProperties;
 import com.relay.bot.event.MessagePublishedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -46,9 +47,13 @@ public class BotReplyService {
         }
 
         Instant executeAt = Instant.now().plusMillis(botProperties.replyDelayMs());
-        taskScheduler.schedule(() -> {
-            messageServiceClient.postMessage(botProperties.userId(), event.channel(), botProperties.replyContent());
-            log.info("Posted reply to channel={} triggered by messageId={}", event.channel(), event.messageId());
-        }, executeAt);
+        try {
+            taskScheduler.schedule(() -> {
+                messageServiceClient.postMessage(botProperties.userId(), event.channel(), botProperties.replyContent());
+                log.info("Posted reply to channel={} triggered by messageId={}", event.channel(), event.messageId());
+            }, executeAt);
+        } catch (TaskRejectedException e) {
+            log.warn("Reply scheduling rejected for messageId={}: {}", event.messageId(), e.getMessage());
+        }
     }
 }
