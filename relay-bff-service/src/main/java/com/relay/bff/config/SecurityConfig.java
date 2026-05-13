@@ -36,9 +36,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                // CSRF disabled: stateless service using JWT bearer tokens via Authorization header.
-                // No session cookies or browser-based auth — classical CSRF attack is not applicable.
-                .csrf(AbstractHttpConfigurer::disable) // codeql[java/spring-disabled-csrf-protection]
+                // codeql[java/spring-disabled-csrf-protection] - stateless JWT Bearer token API; no session
+                // cookies or browser-initiated auth, so classical CSRF attack vector does not apply.
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").permitAll()
