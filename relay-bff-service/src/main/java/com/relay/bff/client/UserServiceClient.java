@@ -4,9 +4,14 @@ import com.relay.bff.dto.user.UserResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
 
 @Component
 public class UserServiceClient {
+
+    private static final Duration BLOCK_TIMEOUT = Duration.ofSeconds(10);
 
     private final WebClient webClient;
 
@@ -19,6 +24,7 @@ public class UserServiceClient {
                 .uri("/api/users/{id}", id)
                 .retrieve()
                 .bodyToMono(UserResponse.class)
-                .block();
+                .switchIfEmpty(Mono.error(new IllegalStateException("Empty response from user-service")))
+                .block(BLOCK_TIMEOUT);
     }
 }

@@ -27,6 +27,9 @@ public class MessageController {
     public ResponseEntity<MessageResponse> send(@Valid @RequestBody SendMessageRequest request,
                                                 HttpServletRequest httpRequest) {
         Long senderId = (Long) httpRequest.getAttribute(JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
+        if (senderId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(messageServiceClient.send(senderId, request));
     }
 }

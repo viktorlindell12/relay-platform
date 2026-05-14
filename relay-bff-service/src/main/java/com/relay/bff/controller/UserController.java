@@ -2,6 +2,9 @@ package com.relay.bff.controller;
 
 import com.relay.bff.client.UserServiceClient;
 import com.relay.bff.dto.user.UserResponse;
+import com.relay.bff.filter.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +22,11 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long callerId = (Long) httpRequest.getAttribute(JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
+        if (!id.equals(callerId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         return ResponseEntity.ok(userServiceClient.getUser(id));
     }
 }

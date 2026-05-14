@@ -7,9 +7,14 @@ import com.relay.bff.dto.auth.RegisterResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
 
 @Component
 public class AuthServiceClient {
+
+    private static final Duration BLOCK_TIMEOUT = Duration.ofSeconds(10);
 
     private final WebClient webClient;
 
@@ -23,7 +28,8 @@ public class AuthServiceClient {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(RegisterResponse.class)
-                .block();
+                .switchIfEmpty(Mono.error(new IllegalStateException("Empty response from auth-service")))
+                .block(BLOCK_TIMEOUT);
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -32,6 +38,7 @@ public class AuthServiceClient {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(LoginResponse.class)
-                .block();
+                .switchIfEmpty(Mono.error(new IllegalStateException("Empty response from auth-service")))
+                .block(BLOCK_TIMEOUT);
     }
 }

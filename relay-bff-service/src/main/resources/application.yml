@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: relay-bff-service
+  main:
+    web-application-type: servlet
 
 services:
   auth-url: ${AUTH_SERVICE_URL:http://localhost:8081}
@@ -11,14 +13,10 @@ services:
   message-url: ${MESSAGE_SERVICE_URL:http://localhost:8083}
 
 internal:
-  api-key: ${INTERNAL_API_KEY:dev-internal-key-change-in-production}
+  api-key: ${INTERNAL_API_KEY}
 
 jwt:
   secret: ${JWT_SECRET:dev-secret-change-in-production-must-be-at-least-256-bits-long}
-
-spring:
-  main:
-    web-application-type: servlet
 
 springdoc:
   api-docs:
