@@ -24,7 +24,7 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     ports:
-      - "127.0.0.1:5672:5672"
+      # AMQP (5672) is internal only — consumed by message-service and bot-service within the Docker network
       - "127.0.0.1:15672:15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
@@ -43,8 +43,6 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-changeme}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
-    ports:
-      - "127.0.0.1:8081:8081"
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,9 +64,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-changeme}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in .env}
       GRPC_PORT: ${GRPC_PORT:-9090}
-    ports:
-      - "127.0.0.1:8082:8082"
-    # gRPC port 9090 is intentionally not published to the host — reachable only within the Docker network
+    # HTTP (8082) and gRPC (9090) ports are intentionally not published — reachable only within the Docker network
     depends_on:
       postgres:
         condition: service_healthy
@@ -94,8 +90,7 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in .env}
       USER_SERVICE_GRPC_ADDRESS: relay-user-service:${GRPC_PORT:-9090}
-    ports:
-      - "127.0.0.1:8083:8083"
+    # HTTP port (8083) is intentionally not published — reachable only within the Docker network via the BFF
     depends_on:
       postgres:
         condition: service_healthy
@@ -121,8 +116,7 @@ services:
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in .env}
       MESSAGE_SERVICE_URL: http://relay-message-service:8083
       BOT_USER_ID: ${BOT_USER_ID:-0}
-    ports:
-      - "127.0.0.1:8084:8084"
+    # HTTP port (8084) is intentionally not published — bot has no client-facing API
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -130,6 +124,33 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  relay-bff-service:
+    build:
+      context: .
+      dockerfile: relay-bff-service/Dockerfile
+    container_name: relay-bff-service
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set in .env}
+      AUTH_SERVICE_URL: http://relay-auth-service:8081
+      USER_SERVICE_URL: http://relay-user-service:8082
+      MESSAGE_SERVICE_URL: http://relay-message-service:8083
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      relay-auth-service:
+        condition: service_healthy
+      relay-user-service:
+        condition: service_healthy
+      relay-message-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
