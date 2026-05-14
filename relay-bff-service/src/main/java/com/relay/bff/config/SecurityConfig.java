@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /**
  * Secures all BFF endpoints with stateless JWT authentication.
- * Public routes: {@code /actuator/health}, {@code /api/auth/**}.
+ * Public routes: {@code /actuator/health}, {@code /api/auth/**}, Swagger UI, OpenAPI docs.
  * All other routes require a valid {@code Authorization: Bearer <token>} header.
  */
 @Configuration
@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

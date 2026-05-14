@@ -1,17 +1,15 @@
 package com.relay.bff.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.Instant;
 
-/**
- * Standard error envelope returned by the BFF on all error responses.
- *
- * @param status    HTTP status code
- * @param message   human-readable error description
- * @param timestamp UTC instant when the error occurred
- */
-public record ErrorResponse(int status, String message, Instant timestamp) {
-
-    /** Convenience factory so callers don't need to pass {@code Instant.now()} manually. */
+@Schema(description = "Standard error envelope returned on all error responses")
+public record ErrorResponse(
+        @Schema(description = "HTTP status code", example = "400") int status,
+        @Schema(description = "Human-readable error description", example = "email: must not be blank") String message,
+        @Schema(description = "UTC timestamp when the error occurred") Instant timestamp
+) {
     public static ErrorResponse of(int status, String message) {
         return new ErrorResponse(status, message, Instant.now());
     }
