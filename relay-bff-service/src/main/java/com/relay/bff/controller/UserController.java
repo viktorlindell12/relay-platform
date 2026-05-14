@@ -24,6 +24,9 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable Long id, HttpServletRequest httpRequest) {
         Long callerId = (Long) httpRequest.getAttribute(JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
+        if (callerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         if (!id.equals(callerId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
