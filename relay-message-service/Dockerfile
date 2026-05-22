@@ -5,11 +5,15 @@ WORKDIR /workspace
 RUN apt-get update && apt-get install -y --no-install-recommends maven \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy poms separately so dependency layer is cached between source changes.
-# relay-proto is included because message-service depends on its generated gRPC classes.
+# Copy all pom.xml files so Maven can validate the full reactor, then cache dependencies.
+# relay-proto source is also included because message-service depends on its generated gRPC classes.
 COPY pom.xml .
-COPY relay-proto/pom.xml relay-proto/pom.xml
+COPY relay-auth-service/pom.xml relay-auth-service/pom.xml
+COPY relay-user-service/pom.xml relay-user-service/pom.xml
 COPY relay-message-service/pom.xml relay-message-service/pom.xml
+COPY relay-bff-service/pom.xml relay-bff-service/pom.xml
+COPY relay-bot-service/pom.xml relay-bot-service/pom.xml
+COPY relay-proto/pom.xml relay-proto/pom.xml
 RUN mvn dependency:go-offline -pl relay-message-service -am -q --no-transfer-progress
 
 COPY relay-proto/src relay-proto/src

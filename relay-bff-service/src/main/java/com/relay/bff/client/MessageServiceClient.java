@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.List;
 
 @Component
 public class MessageServiceClient {
@@ -20,6 +21,20 @@ public class MessageServiceClient {
         this.webClient = webClient;
     }
 
+    public List<MessageResponse> getMessages(String channel) {
+        return webClient.get()
+                .uri(uri -> uri.path("/api/messages")
+                        .queryParam("channel", channel)
+                        .queryParam("size", 50)
+                        .queryParam("sort", "createdAt,asc")
+                        .build())
+                .retrieve()
+                .bodyToMono(MessagePage.class)
+                .switchIfEmpty(Mono.error(new IllegalStateException("Empty response from message-service")))
+                .map(MessagePage::content)
+                .block(BLOCK_TIMEOUT);
+    }
+
     public MessageResponse send(Long senderId, SendMessageRequest request) {
         var internalRequest = new InternalCreateMessageRequest(senderId, request.channel(), request.content());
         return webClient.post()
@@ -30,6 +45,8 @@ public class MessageServiceClient {
                 .switchIfEmpty(Mono.error(new IllegalStateException("Empty response from message-service")))
                 .block(BLOCK_TIMEOUT);
     }
+
+    private record MessagePage(List<MessageResponse> content) {}
 
     private record InternalCreateMessageRequest(Long senderId, String channel, String content) {}
 }

@@ -13,16 +13,23 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Tag(name = "Messages", description = "Messaging operations — JWT required")
 @SecurityRequirement(name = "bearerAuth")
+@Validated
 @RestController
 @RequestMapping("/api/messages")
 public class MessageController {
@@ -31,6 +38,18 @@ public class MessageController {
 
     public MessageController(MessageServiceClient messageServiceClient) {
         this.messageServiceClient = messageServiceClient;
+    }
+
+    @Operation(summary = "List recent messages in a channel")
+    @ApiResponse(responseCode = "200", description = "Messages returned",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(type = "array", implementation = MessageResponse.class)))
+    @ApiResponse(responseCode = "401", description = "Missing or invalid token",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    @GetMapping
+    public ResponseEntity<List<MessageResponse>> getMessages(@RequestParam @NotBlank String channel) {
+        return ResponseEntity.ok(messageServiceClient.getMessages(channel));
     }
 
     @Operation(summary = "Send a message to a channel")

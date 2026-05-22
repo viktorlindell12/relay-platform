@@ -1,11 +1,13 @@
 package com.relay.bff.controller;
 
 import com.relay.bff.client.AuthServiceClient;
+import com.relay.bff.client.UserServiceClient;
 import com.relay.bff.dto.ErrorResponse;
 import com.relay.bff.dto.auth.LoginRequest;
 import com.relay.bff.dto.auth.LoginResponse;
 import com.relay.bff.dto.auth.RegisterRequest;
 import com.relay.bff.dto.auth.RegisterResponse;
+import com.relay.bff.dto.user.CreateUserProfileRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,9 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthServiceClient authServiceClient;
+    private final UserServiceClient userServiceClient;
 
-    public AuthController(AuthServiceClient authServiceClient) {
+    public AuthController(AuthServiceClient authServiceClient, UserServiceClient userServiceClient) {
         this.authServiceClient = authServiceClient;
+        this.userServiceClient = userServiceClient;
     }
 
     @Operation(summary = "Register a new user account")
@@ -43,7 +47,10 @@ public class AuthController {
                     schema = @Schema(implementation = ErrorResponse.class)))
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authServiceClient.register(request));
+        RegisterResponse authResponse = authServiceClient.register(request);
+        userServiceClient.createProfile(new CreateUserProfileRequest(
+                authResponse.userId(), request.email(), request.displayName()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
     }
 
     @Operation(summary = "Authenticate and obtain a JWT token")

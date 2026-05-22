@@ -5,8 +5,14 @@ WORKDIR /workspace
 RUN apt-get update && apt-get install -y --no-install-recommends maven \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy poms separately so dependency layer is cached between source changes.
+# Copy all pom.xml files so Maven can validate the full reactor, then cache dependencies.
+# Sibling module source is not needed — BFF has no inter-module dependencies.
 COPY pom.xml .
+COPY relay-auth-service/pom.xml relay-auth-service/pom.xml
+COPY relay-user-service/pom.xml relay-user-service/pom.xml
+COPY relay-message-service/pom.xml relay-message-service/pom.xml
+COPY relay-bot-service/pom.xml relay-bot-service/pom.xml
+COPY relay-proto/pom.xml relay-proto/pom.xml
 COPY relay-bff-service/pom.xml relay-bff-service/pom.xml
 RUN mvn dependency:go-offline -pl relay-bff-service -am -q --no-transfer-progress
 
