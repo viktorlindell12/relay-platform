@@ -192,7 +192,7 @@ button:not(:disabled):hover {
 }
 
 .content {
-  word-break: break-word;
+  overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 

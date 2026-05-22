@@ -48,8 +48,16 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         RegisterResponse authResponse = authServiceClient.register(request);
-        userServiceClient.createProfile(new CreateUserProfileRequest(
-                authResponse.userId(), request.email(), request.displayName()));
+        try {
+            userServiceClient.createProfile(new CreateUserProfileRequest(
+                    authResponse.userId(), request.email(), request.displayName()));
+        } catch (Exception e) {
+            // Profile creation failed after auth account was created — treat as 409 so the
+            // client can retry with the same email, which will hit the duplicate-email guard.
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT,
+                    "Registration failed, please try again");
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
     }
 

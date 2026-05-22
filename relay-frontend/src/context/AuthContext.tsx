@@ -16,7 +16,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>(() => {
     const token = localStorage.getItem('token');
     const raw = localStorage.getItem('userId');
-    return { token, userId: raw ? Number(raw) : null };
+    const parsed = raw ? Number(raw) : null;
+    return { token, userId: parsed != null && Number.isFinite(parsed) ? parsed : null };
   });
 
   const login = (token: string, userId: number) => {

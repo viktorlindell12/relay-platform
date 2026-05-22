@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getMessages, sendMessage } from '../api/messages';
@@ -17,23 +18,33 @@ export default function Chat() {
   const [messages, setMessages] = useState<MessageResponse[]>([]);
   const [currentUser, setCurrentUser] = useState<UserResponse | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const fetchingRef = useRef(false);
 
   useEffect(() => {
     if (userId == null) return;
-    getUser(userId).then(setCurrentUser).catch(() => {
-      logout();
-      navigate('/login', { replace: true });
+    getUser(userId).then(setCurrentUser).catch((err: unknown) => {
+      const status = axios.isAxiosError(err) ? err.response?.status : null;
+      if (status === 401 || status === 403) {
+        logout();
+        navigate('/login', { replace: true });
+      }
     });
   }, [userId, logout, navigate]);
 
+  const fetchMessages = useCallback(() => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+    getMessages(CHANNEL)
+      .then(setMessages)
+      .catch(() => {})
+      .finally(() => { fetchingRef.current = false; });
+  }, []);
+
   useEffect(() => {
-    const fetchMessages = () => {
-      getMessages(CHANNEL).then(setMessages).catch(() => {});
-    };
     fetchMessages();
     const id = setInterval(fetchMessages, POLL_INTERVAL_MS);
     return () => clearInterval(id);
-  }, []);
+  }, [fetchMessages]);
 
   useEffect(() => {
     if (listRef.current) {
