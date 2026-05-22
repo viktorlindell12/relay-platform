@@ -1,5 +1,6 @@
 package com.relay.bff.client;
 
+import com.relay.bff.dto.user.CreateUserProfileRequest;
 import com.relay.bff.dto.user.UserResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,16 @@ public class UserServiceClient {
 
     public UserServiceClient(@Qualifier("userWebClient") WebClient webClient) {
         this.webClient = webClient;
+    }
+
+    public UserResponse createProfile(CreateUserProfileRequest request) {
+        return webClient.post()
+                .uri("/api/users")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(UserResponse.class)
+                .switchIfEmpty(Mono.error(new IllegalStateException("Empty response from user-service")))
+                .block(BLOCK_TIMEOUT);
     }
 
     public UserResponse getUser(Long id) {
