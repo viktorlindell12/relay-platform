@@ -5,6 +5,10 @@ interface Props {
 }
 
 export default function MessageList({ messages }: Props) {
+  if (messages.length === 0) {
+    return <p className="empty-state">No messages yet. Say something!</p>;
+  }
+
   return (
     <ul className="message-list">
       {messages.map(msg => (
