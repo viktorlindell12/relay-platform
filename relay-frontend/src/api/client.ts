@@ -10,14 +10,18 @@ client.interceptors.request.use(config => {
   return config;
 });
 
+let redirectingToLogin = false;
+
 client.interceptors.response.use(
   r => r,
   err => {
     if (
+      !redirectingToLogin &&
       axios.isAxiosError(err) &&
       err.response?.status === 401 &&
       !err.config?.url?.startsWith('/auth/')
     ) {
+      redirectingToLogin = true;
       localStorage.removeItem('token');
       localStorage.removeItem('userId');
       window.location.href = '/login';
