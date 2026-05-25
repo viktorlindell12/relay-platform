@@ -10,4 +10,20 @@ client.interceptors.request.use(config => {
   return config;
 });
 
+client.interceptors.response.use(
+  r => r,
+  err => {
+    if (
+      axios.isAxiosError(err) &&
+      err.response?.status === 401 &&
+      !err.config?.url?.startsWith('/auth/')
+    ) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      window.location.href = '/login';
+    }
+    return Promise.reject(err);
+  }
+);
+
 export default client;
