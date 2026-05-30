@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: relay-bff-service
+  namespace: relay
+spec:
+  type: LoadBalancer
+  selector:
+    app: relay-bff-service
+  ports:
+    - port: 8080
+      targetPort: 8080
