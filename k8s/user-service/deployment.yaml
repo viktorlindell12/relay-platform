@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay-user-service
+  namespace: relay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay-user-service
+  template:
+    metadata:
+      labels:
+        app: relay-user-service
+    spec:
+      containers:
+        - name: relay-user-service
+          image: relay-user-service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: USER_DB_URL
+              value: jdbc:postgresql://postgres:5432/user_db
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: relay-app-secrets
+                  key: internal-api-key
+            - name: GRPC_PORT
+              value: "9090"
+          ports:
+            - name: http
+              containerPort: 8082
+            - name: grpc
+              containerPort: 9090
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay-auth-service
+  namespace: relay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay-auth-service
+  template:
+    metadata:
+      labels:
+        app: relay-auth-service
+    spec:
+      containers:
+        - name: relay-auth-service
+          image: relay-auth-service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AUTH_DB_URL
+              value: jdbc:postgresql://postgres:5432/auth_db
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: relay-app-secrets
+                  key: jwt-secret
+            - name: JWT_EXPIRATION
+              value: "86400000"
+          ports:
+            - containerPort: 8081
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
