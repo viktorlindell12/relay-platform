@@ -32,10 +32,12 @@ export interface SendMessageRequest {
 
 export interface MessageResponse {
   id: number;
+  senderId: number;
   senderDisplayName: string;
   channel: string;
   content: string;
   createdAt: string;
+  pinned: boolean;
 }
 
 export interface ErrorResponse {

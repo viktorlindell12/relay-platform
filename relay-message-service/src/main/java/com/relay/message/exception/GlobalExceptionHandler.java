@@ -27,6 +27,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles attempts to modify a message the caller does not own.
+     */
+    @ExceptionHandler(MessageAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(MessageAccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.of(403, ex.getMessage()));
+    }
+
+    /**
      * Handles constraint violations on path variables and query parameters (e.g. {@code @Positive}).
      */
     @ExceptionHandler(ConstraintViolationException.class)

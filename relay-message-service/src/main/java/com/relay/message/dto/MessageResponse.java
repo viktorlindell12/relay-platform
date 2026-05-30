@@ -11,5 +11,6 @@ import java.time.Instant;
  * @param channel            name of the channel the message belongs to (e.g. "general")
  * @param content            message text
  * @param createdAt          UTC timestamp when the message was persisted
+ * @param pinned             true if the message is pinned and exempt from the 24-hour expiry
  */
-public record MessageResponse(Long id, Long senderId, String senderDisplayName, String channel, String content, Instant createdAt) {}
+public record MessageResponse(Long id, Long senderId, String senderDisplayName, String channel, String content, Instant createdAt, boolean pinned) {}

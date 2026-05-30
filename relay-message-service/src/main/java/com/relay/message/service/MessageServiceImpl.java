@@ -4,6 +4,7 @@ import com.relay.message.dto.CreateMessageRequest;
 import com.relay.message.dto.MessageResponse;
 import com.relay.message.entity.Message;
 import com.relay.message.event.MessageEventPublisher;
+import com.relay.message.exception.MessageAccessDeniedException;
 import com.relay.message.exception.MessageNotFoundException;
 import com.relay.message.grpc.UserServiceClient;
 import com.relay.message.repository.MessageRepository;
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Default implementation of {@link MessageService}.
@@ -84,7 +88,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional(readOnly = true)
     public Page<MessageResponse> getByChannel(String channel, Pageable pageable) {
-        return messageRepository.findByChannel(channel, pageable)
+        return messageRepository.findActiveByChannel(channel, Instant.now(), pageable)
                 .map(this::toResponse);
     }
 
@@ -100,6 +104,36 @@ public class MessageServiceImpl implements MessageService {
         log.debug("Deleted message id={}", id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public MessageResponse togglePin(Long messageId, Long requesterId) {
+        // Pessimistic write lock prevents concurrent toggles from reading the same state
+        // and persisting the same result (lost-update problem).
+        Message message = messageRepository.findByIdForUpdate(messageId)
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
+
+        if (!message.getSenderId().equals(requesterId)) {
+            throw new MessageAccessDeniedException();
+        }
+
+        // Reject expired rows so the cleanup window cannot be bypassed by re-pinning.
+        Instant now = Instant.now();
+        if (!message.isPinned() && message.getExpiresAt() != null && !message.getExpiresAt().isAfter(now)) {
+            throw new MessageNotFoundException(messageId);
+        }
+
+        boolean nowPinned = !message.isPinned();
+        message.setPinned(nowPinned);
+        message.setExpiresAt(nowPinned ? null : now.plus(24, ChronoUnit.HOURS));
+
+        Message saved = messageRepository.save(message);
+        log.debug("Message id={} pinned={}", saved.getId(), saved.isPinned());
+        return toResponse(saved);
+    }
+
     private MessageResponse toResponse(Message message) {
         String senderDisplayName = userServiceClient.getDisplayName(message.getSenderId());
         return new MessageResponse(
@@ -108,7 +142,8 @@ public class MessageServiceImpl implements MessageService {
                 senderDisplayName,
                 message.getChannel(),
                 message.getContent(),
-                message.getCreatedAt()
+                message.getCreatedAt(),
+                message.isPinned()
         );
     }
 }

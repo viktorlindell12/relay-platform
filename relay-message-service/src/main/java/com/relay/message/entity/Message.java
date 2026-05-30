@@ -2,6 +2,7 @@ package com.relay.message.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Stores a single message sent in a channel.
@@ -25,12 +26,21 @@ public class Message {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(nullable = false)
+    private boolean pinned = false;
+
+    @Column(name = "expires_at")
+    private Instant expiresAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @PrePersist
     private void prePersist() {
         createdAt = Instant.now();
+        if (!pinned) {
+            expiresAt = createdAt.plus(24, ChronoUnit.HOURS);
+        }
     }
 
     /** @return internal message ID */
@@ -53,6 +63,18 @@ public class Message {
 
     /** @param content message text */
     public void setContent(String content) { this.content = content; }
+
+    /** @return true if the message is pinned and exempt from expiry */
+    public boolean isPinned() { return pinned; }
+
+    /** @param pinned whether the message should be preserved indefinitely */
+    public void setPinned(boolean pinned) { this.pinned = pinned; }
+
+    /** @return deadline after which the message is eligible for cleanup, or null if pinned */
+    public Instant getExpiresAt() { return expiresAt; }
+
+    /** @param expiresAt expiry deadline, or null to exempt from cleanup */
+    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
 
     /** @return UTC timestamp when this message was persisted */
     public Instant getCreatedAt() { return createdAt; }

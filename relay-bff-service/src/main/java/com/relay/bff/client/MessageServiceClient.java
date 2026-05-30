@@ -46,6 +46,17 @@ public class MessageServiceClient {
                 .block(BLOCK_TIMEOUT);
     }
 
+    public MessageResponse togglePin(Long messageId, Long requesterId) {
+        return webClient.patch()
+                .uri(uri -> uri.path("/api/messages/{id}/pin")
+                        .queryParam("requesterId", requesterId)
+                        .build(messageId))
+                .retrieve()
+                .bodyToMono(MessageResponse.class)
+                .switchIfEmpty(Mono.error(new IllegalStateException("Empty response from message-service")))
+                .block(BLOCK_TIMEOUT);
+    }
+
     private record MessagePage(List<MessageResponse> content) {}
 
     private record InternalCreateMessageRequest(Long senderId, String channel, String content) {}
