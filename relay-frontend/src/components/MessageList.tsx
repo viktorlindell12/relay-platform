@@ -24,6 +24,7 @@ export default function MessageList({ messages, currentUserId, onTogglePin }: Pr
                 className={`pin-btn${msg.pinned ? ' active' : ''}`}
                 onClick={() => void onTogglePin(msg.id)}
                 title={msg.pinned ? 'Unpin message' : 'Pin message'}
+                aria-pressed={msg.pinned}
               >
                 {msg.pinned ? '★' : '☆'}
               </button>

@@ -19,6 +19,7 @@ export default function Chat() {
   const [currentUser, setCurrentUser] = useState<UserResponse | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const fetchingRef = useRef(false);
+  const pinningRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     if (userId == null) return;
@@ -58,8 +59,14 @@ export default function Chat() {
   };
 
   const handleTogglePin = async (messageId: number) => {
-    const updated = await togglePin(messageId);
-    setMessages(prev => prev.map(m => m.id === messageId ? updated : m));
+    if (pinningRef.current.has(messageId)) return;
+    pinningRef.current.add(messageId);
+    try {
+      const updated = await togglePin(messageId);
+      setMessages(prev => prev.map(m => m.id === messageId ? updated : m));
+    } finally {
+      pinningRef.current.delete(messageId);
+    }
   };
 
   const handleLogout = () => {

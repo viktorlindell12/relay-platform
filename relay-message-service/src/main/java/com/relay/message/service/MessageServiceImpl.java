@@ -110,16 +110,24 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional
     public MessageResponse togglePin(Long messageId, Long requesterId) {
-        Message message = messageRepository.findById(messageId)
+        // Pessimistic write lock prevents concurrent toggles from reading the same state
+        // and persisting the same result (lost-update problem).
+        Message message = messageRepository.findByIdForUpdate(messageId)
                 .orElseThrow(() -> new MessageNotFoundException(messageId));
 
         if (!message.getSenderId().equals(requesterId)) {
             throw new MessageAccessDeniedException();
         }
 
+        // Reject expired rows so the cleanup window cannot be bypassed by re-pinning.
+        Instant now = Instant.now();
+        if (!message.isPinned() && message.getExpiresAt() != null && !message.getExpiresAt().isAfter(now)) {
+            throw new MessageNotFoundException(messageId);
+        }
+
         boolean nowPinned = !message.isPinned();
         message.setPinned(nowPinned);
-        message.setExpiresAt(nowPinned ? null : Instant.now().plus(24, ChronoUnit.HOURS));
+        message.setExpiresAt(nowPinned ? null : now.plus(24, ChronoUnit.HOURS));
 
         Message saved = messageRepository.save(message);
         log.debug("Message id={} pinned={}", saved.getId(), saved.isPinned());

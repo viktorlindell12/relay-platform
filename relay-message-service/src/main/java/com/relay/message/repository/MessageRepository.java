@@ -4,9 +4,13 @@ import com.relay.message.entity.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
+import java.util.Optional;
 
 import java.time.Instant;
 
@@ -27,6 +31,17 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      */
     @Query("SELECT m FROM Message m WHERE m.channel = :channel AND (m.pinned = true OR m.expiresAt > :now)")
     Page<Message> findActiveByChannel(@Param("channel") String channel, @Param("now") Instant now, Pageable pageable);
+
+    /**
+     * Acquires a row-level write lock on the message for the duration of the transaction.
+     * Used by the pin-toggle path to prevent lost updates under concurrent requests.
+     *
+     * @param id the message ID
+     * @return the locked message, or empty if not found
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT m FROM Message m WHERE m.id = :id")
+    Optional<Message> findByIdForUpdate(@Param("id") Long id);
 
     /**
      * Bulk-deletes unpinned messages whose expiry deadline has passed.
