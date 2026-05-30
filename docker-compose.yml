@@ -162,12 +162,12 @@ services:
       dockerfile: Dockerfile
     container_name: relay-frontend
     ports:
-      - "127.0.0.1:80:80"
+      - "127.0.0.1:80:8080"
     depends_on:
       relay-bff-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost/"]
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/"]
       interval: 10s
       timeout: 5s
       retries: 5
