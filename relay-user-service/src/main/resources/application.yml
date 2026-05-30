@@ -20,7 +20,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 internal:
-  api-key: ${INTERNAL_API_KEY:?INTERNAL_API_KEY must be set}
+  api-key: ${INTERNAL_API_KEY}
 
 grpc:
   server:
