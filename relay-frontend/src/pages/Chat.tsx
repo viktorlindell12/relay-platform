@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getMessages, sendMessage } from '../api/messages';
+import { getMessages, sendMessage, togglePin } from '../api/messages';
 import { getUser } from '../api/user';
 import MessageList from '../components/MessageList';
 import MessageInput from '../components/MessageInput';
@@ -57,6 +57,11 @@ export default function Chat() {
     setMessages(prev => [...prev, msg]);
   };
 
+  const handleTogglePin = async (messageId: number) => {
+    const updated = await togglePin(messageId);
+    setMessages(prev => prev.map(m => m.id === messageId ? updated : m));
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
@@ -69,7 +74,7 @@ export default function Chat() {
         {currentUser && <UserBadge user={currentUser} onLogout={handleLogout} />}
       </header>
       <div className="message-list-wrapper" ref={listRef}>
-        <MessageList messages={messages} />
+        <MessageList messages={messages} currentUserId={userId} onTogglePin={handleTogglePin} />
       </div>
       <MessageInput onSend={handleSend} />
     </div>

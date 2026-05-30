@@ -6,3 +6,6 @@ export const getMessages = (channel: string): Promise<MessageResponse[]> =>
 
 export const sendMessage = (data: SendMessageRequest): Promise<MessageResponse> =>
   client.post<MessageResponse>('/messages', data).then(r => r.data);
+
+export const togglePin = (id: number): Promise<MessageResponse> =>
+  client.patch<MessageResponse>(`/messages/${id}/pin`).then(r => r.data);

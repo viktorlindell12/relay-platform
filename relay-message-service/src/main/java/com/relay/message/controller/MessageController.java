@@ -77,4 +77,19 @@ public class MessageController {
         messageService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Toggles the pinned state of a message.
+     * The caller must be the original sender; otherwise 403 is returned.
+     *
+     * @param id          the message ID
+     * @param requesterId authUserId of the caller — must match the message sender
+     * @return 200 OK with the updated message
+     */
+    @PatchMapping("/{id}/pin")
+    public ResponseEntity<MessageResponse> togglePin(
+            @PathVariable @Positive Long id,
+            @RequestParam @Positive Long requesterId) {
+        return ResponseEntity.ok(messageService.togglePin(id, requesterId));
+    }
 }

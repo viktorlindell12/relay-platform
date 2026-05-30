@@ -43,4 +43,16 @@ public interface MessageService {
      * @throws com.relay.message.exception.MessageNotFoundException if no message exists with that ID
      */
     void delete(Long id);
+
+    /**
+     * Toggles the pinned state of a message.
+     * Pinning clears the expiry deadline; unpinning resets it to 24 hours from now.
+     *
+     * @param messageId   the message to toggle
+     * @param requesterId authUserId of the caller — must match the message sender
+     * @return the updated message
+     * @throws com.relay.message.exception.MessageNotFoundException     if no message exists with that ID
+     * @throws com.relay.message.exception.MessageAccessDeniedException if the caller is not the sender
+     */
+    MessageResponse togglePin(Long messageId, Long requesterId);
 }

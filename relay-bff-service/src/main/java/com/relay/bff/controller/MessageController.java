@@ -19,11 +19,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.constraints.Positive;
 
 import java.util.List;
 
@@ -70,5 +74,28 @@ public class MessageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.of(401, "Unauthorized"));
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(messageServiceClient.send(senderId, request));
+    }
+
+    @Operation(summary = "Toggle the pinned state of a message — only the sender may pin/unpin")
+    @ApiResponse(responseCode = "200", description = "Pin state toggled",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = MessageResponse.class)))
+    @ApiResponse(responseCode = "401", description = "Missing or invalid token",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Caller is not the message sender",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = "Message not found",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)))
+    @PatchMapping("/{id}/pin")
+    public ResponseEntity<?> togglePin(@PathVariable @Positive Long id,
+                                       HttpServletRequest httpRequest) {
+        Long userId = (Long) httpRequest.getAttribute(JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.of(401, "Unauthorized"));
+        }
+        return ResponseEntity.ok(messageServiceClient.togglePin(id, userId));
     }
 }
