@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/api/auth.ts","./src/api/client.ts","./src/api/messages.ts","./src/api/user.ts","./src/components/messageinput.tsx","./src/components/messagelist.tsx","./src/components/userbadge.tsx","./src/context/authcontext.tsx","./src/pages/chat.tsx","./src/pages/login.tsx","./src/pages/register.tsx","./src/types/index.ts"],"version":"5.8.3"}
