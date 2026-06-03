@@ -72,7 +72,7 @@ graph TD
 
 ## Event Flow — `message.published`
 
-```
+```text
 1. Client  →  POST /api/messages  →  BFF (JWT validated)
 2. BFF     →  POST /messages      →  relay-message-service
 3. relay-message-service saves message to message_db
@@ -187,5 +187,5 @@ kubectl get service relay-frontend -n relay
 | POST   | /api/auth/login          | Public   | Login, returns JWT       |
 | GET    | /api/users/{id}          | Required | Get user profile         |
 | POST   | /api/messages            | Required | Send a message           |
-| GET    | /api/messages?channel=   | Required | List active messages     |
+| GET    | /api/messages?channel={channel} | Required | List active messages     |
 | PATCH  | /api/messages/{id}/pin   | Required | Toggle pin on a message  |
